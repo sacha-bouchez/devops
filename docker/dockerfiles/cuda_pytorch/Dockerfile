@@ -54,8 +54,15 @@ RUN if [ -s /tmp/requirements.txt ]; then \
 # Add workspace to pythonpath
 ENV PYTHONPATH="${WORKSPACE}:${PYTHONPATH}"
 
+# Keep shell sane
+ENV SHELL=/bin/bash
+
+# Copy the entrypoint
+COPY src/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Default to non-root user
 USER $USERNAME
 
-# Keep shell sane
-ENV SHELL=/bin/bash
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["bash"]
