@@ -1,12 +1,44 @@
-version: '3.9'
-
 services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
     ports:
       - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --allowed-hosts "*"
     volumes:
-      - ./mlflow:/mlflow
+      - /home/sacha.bouchez-delotte/mlflow:/mlflow
     restart: unless-stopped
+
+    networks:
+      - mlflow-net
+
+  dev:
+    container_name: pytorch_cuda_dev-runtime
+    build:
+      context: ../dockerfiles/cuda_pytorch
+      dockerfile: Dockerfile
+    image: pytorch2.9.0-cuda12.8-cudnn9-runtime:latest
+    # GPU support (requires Docker Engine and NVIDIA Container Toolkit)
+    gpus: all
+    environment:
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      # bind development project workspace into container
+      - /home/sacha.bouchez-delotte/development:/workspace
+      - /home/sacha.bouchez-delotte/mlflow:/mlflow
+    networks:
+      - mlflow-net
+    restart: unless-stopped
+    # run as the non-root user created in the Dockerfile (UID 1001)
+    user: "1001:1001"
+    tty: true
+
+networks:
+  mlflow-net:
+    driver: bridge
