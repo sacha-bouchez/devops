@@ -29,8 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
-# Create a non-root vscode user (UID 1001) — matches common devcontainer UX
-ARG USERNAME=vscode
+# Create a non-root devuser user (UID 1001) — matches common devcontainer UX
+ARG USERNAME=devuser
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 
